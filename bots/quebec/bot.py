@@ -35,7 +35,7 @@ def is_cursed(msg):
 
 
 # use states to navigate through chat
-possible_states = ["state_0", "state_1", "state_2", "state_3", "state_4", "state_5", "state_6", "state_7"]
+possible_states = ["state_0", "state_1", "state_2", "state_3", "state_4", "state_5", "state_6", "state_7", "final_state"]
 current_state = None
 cb_gender = None
 cb_name = None
@@ -310,16 +310,16 @@ class Bot:
             elif current_state == possible_states[5] and (re.search('regarde', last_user_message) != None): # Eingabe korrekt: regarder
                 current_state = possible_states[6]
                 plan["Vendredi"][1] = "Regarder un jeu de hockey"# TO DO: use Spacy to get activity from user_message
-                return """Très bon choix, moi je préfère aussi regarder les professionnels. \n Le vendredi soir j'ai organiser un fête d'adieu pour toi.
+                return """Très bon choix, moi je préfère aussi regarder les professionnels. \n Le vendredi soir j'ai organisé un fête d'adieu pour toi.
                 Si tu veux tu peux chanter au karaoké là."""
             elif current_state == possible_states[5] and (re.search('joue', last_user_message) != None): # Eingabe korrekt: jouer
                 current_state = possible_states[6]
                 plan["Vendredi"][1] = "Jouer au hockey" # TO DO: use Spacy to get activity from user_message
                 if cb_gender == "male":
-                    return """Donc, je suis très curieux de voir dont tu es capable ;) \n Le vendredi soir j'ai organiser un fête d'adieu pour toi.
+                    return """Donc, je suis très curieux de voir dont tu es capable ;) \n Le vendredi soir j'ai organisé un fête d'adieu pour toi.
                     Si tu veux tu peux chanter au karaoké là."""
                 elif cb_gender == "female":
-                    return """Donc, je suis très curieuse de voir dont tu es capable ;) \n Le vendredi soir j'ai organiser un fête d'adieu pour toi.
+                    return """Donc, je suis très curieuse de voir dont tu es capable ;) \n Le vendredi soir j'ai organisé un fête d'adieu pour toi.
                     Si tu veux tu peux chanter au karaoké là."""
             elif current_state == possible_states[5]: # && Eingabe ungültig
                 return """Le vendredi midi on peut jouer ou regarder au hockey au complexe sportif Bell.""" # TO DO (optional): Liste anlegen und random Frage generieren
@@ -351,22 +351,24 @@ class Bot:
             elif current_state == possible_states[7] and re.search('O|oui', last_user_message) != None:
                 session.bot.online = "offline"
                 session.bot.save()
+                current_state = possible_states[8]
                 # switch Bot from online to offline
                 # and don't send a response from chatbot anymore
-                if cb_gender == "male": # GENDERN: mon partenaire
+                if cb_gender == "male":
                     return """Voici notre plan pour la semaine d’échange:
                     <pre>{}</pre>
                     \n Je suis heureux de te rencontrer en personne ! À bientôt !""".format(tabulate(plan, headers=plan.keys(), tablefmt= 'fancy_grid'))
-                elif cb_gender == "female": # GENDERN: mon partenaire
+                elif cb_gender == "female":
                     return """Voici notre plan pour la semaine d’échange:
                     <pre>{}</pre>
                     \n Je suis heureuse de te rencontrer en personne ! À bientôt !""".format(tabulate(plan, headers=plan.keys(), tablefmt= 'fancy_grid'))
             elif current_state == possible_states[7] and re.search('N|non', last_user_message) != None:
                 session.bot.online = "offline"
                 session.bot.save()
-                if cb_gender == "male": # GENDERN: mon partenaire
+                current_state = possible_states[8]
+                if cb_gender == "male":
                     return "Je suis heureux de te rencontrer en personne ! À bientôt !"
-                elif cb_gender == "female": # GENDERN: mon partenaire
+                elif cb_gender == "female":
                     return "Je suis heureuse de te rencontrer en personne ! À bientôt !"
             elif current_state == possible_states[7]:
                 return "Veux-tu que je t'envoie le plan pour la semaine d'échange? Dis-moi si c'est oui ou non, s'il te plaît."
