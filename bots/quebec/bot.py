@@ -46,10 +46,8 @@ possible_dislikes = []
 suggestion = None
 student_name = None
 action = None
-x = None
 
-# list of activities with tuple (activity, category, activity_in_short)
-###### TO DO: adjust sport & culture into infinitive ###########
+# list of activities with tuple (activity, category, activity_in_short, activitiy_for_plan)
 activities_list = [("faire une randonnée dans le parc national de la Jacques-Cartier", "sport", "jacquescartier", "Randonnée - Jacques-Cartier"),
     ("faire une randonnée guidée dans le parc de la Gatineau", "sport", "gatineau", "Randonnée guidée - Gatineau"),
     ("faire du ski", "sport", "ski", "Ski"), ("faire du snowboard", "sport", "snowboard", "Snowboard"), ("faire de la luge", "sport", "luge", "Luge"),
@@ -159,7 +157,8 @@ class Bot:
         # determine dislikes of chatbot
         cb_dislikes = random.sample(possible_dislikes, 20)
         cb_dislikes_short = [dislike[2] for dislike in cb_dislikes]
-        print(cb_dislikes_short, "DISLIKES")
+        # enable this to check for dislikes in state_3
+        #print(cb_dislikes_short, "DISLIKES")
 
         current_state = possible_states[0]
         # incorporate gender into chatbots welcome statement
@@ -173,8 +172,6 @@ class Bot:
             return "Something went wrong"
 
     def chat(self, last_user_message, session):
-        # einfach alles an code in dieser methode schreiben
-        # generell wichtig: versuchen auf unklarheiten, negierung, rechtscreibfehler, etc. mit ablenkungen reagiern
         global current_state
         global cb_preferences
         global suggestion
@@ -185,7 +182,6 @@ class Bot:
 
         try:
             # check message for cursewords
-            # return """Bitte freundlich bleiben und die Frage beantworten."""
             if is_cursed([last_user_message]) == True:
                 return "S'il te plaît, reste aimable et réponds à la dernière question!"
             ######## 0 ########
@@ -204,8 +200,8 @@ class Bot:
                 return """Tu t'appelles comment ?"""
 
             ######## 1 ########
-            # use regex to detect yes and no
             # state_1
+            # use regex to detect yes and no
             elif current_state == possible_states[1] and re.search('O|oui', last_user_message) != None: # Eingabe korrekt: Oui
                 current_state = possible_states[2]
                 return """C'est cool! Alors, planifions ta visite le mois prochain.\nEst-ce que tu préfères des activités sportives, culturelles ou sociales ?"""
@@ -217,8 +213,8 @@ class Bot:
                 return """Es-tu déjà allé.e au Québec ? Dis-moi si c'est oui ou non, s'il te plaît.""" # TO DO (optional): Liste anlegen und random Frage generieren
 
             ######## 2 ########
-            # use regex to detect sport and culture and social
             # state_2
+            # use regex to detect sport and culture and social
             elif current_state == possible_states[2] and re.search('S|sport', last_user_message) != None: # Eingabe korrekt: sport
                 current_state = possible_states[3]
                 index, suggestion = [(i, pref[0]) for i, pref in enumerate(cb_preferences) if pref[1] == "sport"].pop(0)
@@ -244,12 +240,13 @@ class Bot:
                 return """C'est super! On peut {} le mercredi.
                 J'aimerais bien aussi te montrer ma ville le lundi après ton arrivée. Qu'est-ce qu'on va faire le mardi ?""".format(suggestion)
             elif current_state == possible_states[2]: # && Eingabe ungültig
-                return """Est-ce que tu préfères des activités sportives, culturelles ou sociales ?""" # TO DO (optional): Liste anlegen und random Frage generieren
+                return """Est-ce que tu préfères des activités sportives, culturelles ou sociales ?"""
 
             ######## 3 ########
-            # state_3 - TO DO: Hierbei beachten, dass nicht versehentlich Eingabe als no Dislike durchgeht, sondern auch ungültige eingaben gefunden werden
+            # state_3
+            # if last_user_message contains a proposed activity that is not in the chatbot's dislikes
             if current_state == possible_states[3] and not(any(word for word in cb_dislikes_short if word in re.sub(r'[^\w\s]', '', last_user_message.lower()).split())): # Eingabe korrekt: no Dislike
-                # strip last_user_message of words like "Je, aimerais"
+                # strip last_user_message of words like "Je, aimerais, ..."
                 action = process_name_action([last_user_message])
                 action = " ".join(action).capitalize()
                 plan["Mardi"][1] = action
@@ -279,11 +276,11 @@ class Bot:
                     return """Moi, je n‘aime pas ça. Mais on peut {}.
                     Est-ce que tu as envie de {} le jeudi ?""".format(new_activity, suggestion)
             elif current_state == possible_states[3]: # && Eingabe ungültig
-                return """Qu'est-ce qu'on va faire le mardi ?""" # TO DO (optional): Liste anlegen und random Frage generieren
+                return """Qu'est-ce qu'on va faire le mardi ?"""
 
             ######## 4 ########
-            # use regex to detect yes and no
             # state_4
+            # use regex to detect yes and no
             elif current_state == possible_states[4] and re.search('O|oui', last_user_message) != None: # && Eingabe korrekt: Oui
                 current_state = possible_states[5]
                 return """Ah, parfait ! Enfin, il faut choisir une activité pour le vendredi midi. Il y a la possibilité
@@ -295,26 +292,27 @@ class Bot:
                 plan["Jeudi"][2] = action
                 # if new_activity starts with a vocal
                 if re.search("^a", new_activity):
-                    return """Est-ce que tu as envie d'{} le jeudi?""".format(new_activity) # TO DO (optional): Liste anlegen und random Frage generieren
+                    return """Est-ce que tu as envie d'{} le jeudi?""".format(new_activity)
                 else:
                     return """Est-ce que tu as envie de {} le jeudi?""".format(new_activity)
             elif current_state == possible_states[4]: # && Eingabe ungültig
                 if re.search("^a", suggestion):
-                    return """Est-ce que tu as envie d'{} le jeudi? Dis-moi si c'est oui ou non, s'il te plaît.""".format(suggestion) # TO DO (optional): Liste anlegen und random Frage generieren
+                    return """Est-ce que tu as envie d'{} le jeudi? Dis-moi si c'est oui ou non, s'il te plaît.""".format(suggestion)
                 else:
-                    return """Est-ce que tu as envie de {} le jeudi? Dis-moi si c'est oui ou non, s'il te plaît.""".format(suggestion) # TO DO (optional): Liste anlegen und random Frage generieren
+                    return """Est-ce que tu as envie de {} le jeudi? Dis-moi si c'est oui ou non, s'il te plaît.""".format(suggestion)
 
 
             ######## 5 ########
             # state_5
+            # use regex to detect watch or play
             elif current_state == possible_states[5] and (re.search('regarde', last_user_message) != None): # Eingabe korrekt: regarder
                 current_state = possible_states[6]
-                plan["Vendredi"][1] = "Regarder un jeu de hockey"# TO DO: use Spacy to get activity from user_message
+                plan["Vendredi"][1] = "Regarder un jeu de hockey"
                 return """Très bon choix, moi je préfère aussi regarder les professionnels. \n Le vendredi soir j'ai organisé un fête d'adieu pour toi.
                 Si tu veux tu peux chanter au karaoké là."""
             elif current_state == possible_states[5] and (re.search('joue', last_user_message) != None): # Eingabe korrekt: jouer
                 current_state = possible_states[6]
-                plan["Vendredi"][1] = "Jouer au hockey" # TO DO: use Spacy to get activity from user_message
+                plan["Vendredi"][1] = "Jouer au hockey"
                 if cb_gender == "male":
                     return """Donc, je suis très curieux de voir dont tu es capable ;) \n Le vendredi soir j'ai organisé un fête d'adieu pour toi.
                     Si tu veux tu peux chanter au karaoké là."""
@@ -322,10 +320,11 @@ class Bot:
                     return """Donc, je suis très curieuse de voir dont tu es capable ;) \n Le vendredi soir j'ai organisé un fête d'adieu pour toi.
                     Si tu veux tu peux chanter au karaoké là."""
             elif current_state == possible_states[5]: # && Eingabe ungültig
-                return """Le vendredi midi on peut jouer ou regarder au hockey au complexe sportif Bell.""" # TO DO (optional): Liste anlegen und random Frage generieren
+                return """Le vendredi midi on peut jouer ou regarder au hockey au complexe sportif Bell."""
 
             ######## 6 ########
             # state_6
+            # use regex to detect yes or no
             elif current_state == possible_states[6] and re.search('O|oui', last_user_message) != None: # && Eingabe korrekt: oui
                 current_state = possible_states[7]
                 plan["Vendredi"][2] = "Fête d'adieu + chanter au karaoké"
@@ -348,12 +347,12 @@ class Bot:
 
             ######## 7 ########
             # state_7
+            # use regex to detect yes or no
             elif current_state == possible_states[7] and re.search('O|oui', last_user_message) != None:
+                # switch Bot from online to offline and set state to final state
                 session.bot.online = "offline"
                 session.bot.save()
                 current_state = possible_states[8]
-                # switch Bot from online to offline
-                # and don't send a response from chatbot anymore
                 if cb_gender == "male":
                     return """Voici notre plan pour la semaine d’échange:
                     <pre>{}</pre>
