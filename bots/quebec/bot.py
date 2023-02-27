@@ -102,7 +102,7 @@ plan = {' ': ['Matin', 'Midi', 'Soir'],
         'Samedi': ["Adieu", "Départ", "Départ"]}
 
 cursewords = ["putain", "merde", "connard", "connasse", "hure", "hurensohn", "scheiße", "arschloch", "schlampe"]
-# TO DO: adjust so that only lemmas (or stems) have to be written here
+
 stopwords = ["de", "je", "suis", "m'", "mappelle", "appelle", "mapele", "mapelle", "mappele", "apele", "apelle", "appele", "bonjour",
             "mon", "ton", "nom", "est", "salut", "moi", "partenaire", "allemagne", "allemand", "osnabrück", "de", "d'", "du", "et", "échange",
             "faire", "aller", "aimer", "bien", "sur", "sûr", "visiter", "on", "nous", "tu", "j'", "aimerais", "mardi", "le", "l'",
@@ -110,10 +110,6 @@ stopwords = ["de", "je", "suis", "m'", "mappelle", "appelle", "mapele", "mapelle
 nlp = spacy.load("fr_core_news_sm")
 
 class Bot:
-    '''
-    To DO:
-    - save information on sport, culture, social in order to adjust proposed suggestions
-    '''
 
     name = 'Québec' # change to random name from list
     avatar = 'avatar/quebec-city.jpeg' # picture from quebec
@@ -210,7 +206,7 @@ class Bot:
                 return """C'est dommage! Mais alors, je peux te montrer beaucoup de nouvelles choses. \n Alors, planifions ta visite le mois prochain.
                 Est-ce que tu préfères des activités sportives, culturelles ou sociales ?"""
             elif current_state == possible_states[1]: # && Eingabe ungültig
-                return """Es-tu déjà allé.e au Québec ? Dis-moi si c'est oui ou non, s'il te plaît.""" # TO DO (optional): Liste anlegen und random Frage generieren
+                return """Es-tu déjà allé.e au Québec ? Dis-moi si c'est oui ou non, s'il te plaît."""
 
             ######## 2 ########
             # state_2
@@ -343,7 +339,7 @@ class Bot:
                     return """Dommage, alors je dois chanter tout seule.
                     Veux-tu que je t'envoie le plan pour la semaine d'échange?"""
             elif current_state == possible_states[6]: # && Eingabe ungültig
-                return """Est-ce que tu veux chanter au karaoké ? Dis-moi si c'est oui ou non, s'il te plaît.""" # TO DO (optional): Liste anlegen und random Frage generieren
+                return """Est-ce que tu veux chanter au karaoké ? Dis-moi si c'est oui ou non, s'il te plaît."""
 
             ######## 7 ########
             # state_7
